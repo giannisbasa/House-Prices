@@ -1,0 +1,4 @@
+Alley
+PoolQC
+Fence
+MiscFeature
