@@ -1,0 +1,12 @@
+scikit-learn
+Flask
+pandas
+numpy
+matplotlib
+Seaborn
+fast-ml
+datetime
+scipy
+xgboost
+
+
