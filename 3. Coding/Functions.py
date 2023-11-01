@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 pd.pandas.set_option('display.max_columns', None)
 import os
+import sys
 import pathlib
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -29,28 +30,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# Sample submission
-df = pd.read_csv(r'/Users/macbookpro/Desktop/PYTHON/1. PROJECTS/1. House Prices/house-prices-advanced-regression-techniques/train.csv')
-
-# Copy
-data = df.copy()
-
-# Select only numeric variables 
-number = data.select_dtypes(include=['number'])
-
-datetime = [col for col in number if 'Year' in col or 'Yr' in col] # Datetime variables
-dt_df = data[datetime]
-
-num_var = [col for col in number if 'Year' not in col and 'Yr' not in col] # Numeric variables without datetime
-num_df = data[num_var]
-
-cat_df = data.select_dtypes(exclude=['number']) # Categorical variables
-
-
-
-
-
-
+#######################################################################################
 
 # GENERAL FUNCTIONS
 ## 1.1 Function for features to delete
@@ -84,24 +64,26 @@ def duplicate_features(df, var1, var2):
 
 
 ## 1.4 compute the vif for all given features
-def compute_vif(considered_features):
+# def compute_vif(considered_features):
     
-    X = train[considered_features]
-    # the calculation of variance inflation requires a constant
-    X['intercept'] = 1
+#     X = train[considered_features]
+#     # the calculation of variance inflation requires a constant
+#     X['intercept'] = 1
     
-    # create dataframe to store vif values
-    vif = pd.DataFrame()
-    vif["Variable"] = X.columns
-    vif["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
-    vif = vif[vif['Variable']!='intercept']
-    return vif
+#     # create dataframe to store vif values
+#     vif = pd.DataFrame()
+#     vif["Variable"] = X.columns
+#     vif["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+#     vif = vif[vif['Variable']!='intercept']
+#     return vif
 
 
 ## 1.5 Calculate the distribution of a value
 def distribution(df, x):
     return df[x].value_counts(normalize=True).round(2).mul(100)
 
+
+#######################################################################################
 
 
 # GRAPHS 
@@ -127,6 +109,7 @@ def distplot(df, x):
     plt.legend()
     plt.show()
 
+
 ## 2.3 Histplot
 def histplot(df, x):
     plt.style.use('seaborn-darkgrid')
@@ -134,6 +117,8 @@ def histplot(df, x):
     plt.title('Histplot');
     sns.histplot(df[x]);
 
+
+#######################################################################################
 
 
 # NUMERIC FEATURES
@@ -224,6 +209,8 @@ def winzorning(df, fences_df, inplace=False):
     return df
 
 
+#######################################################################################
+
 
 # CATEGORICAL FEATURES
 ## Impute missing values
@@ -271,6 +258,8 @@ def cardinality(df, threshold=None, inplace = False):
     return result_df
 
 
+#######################################################################################
+
 
 # DATETIME
 ## Create new datetime columns from the difference of two dates
@@ -281,7 +270,61 @@ def datetime_calc(df, var1, var2):
     return df
 
 
+#######################################################################################
+
+
+# SCALING 
+## Grouping values in categorical features
+def group_categorical_features(data):
+    # LotShape
+    data['LotShape'] = np.where(data['LotShape'].str.contains('IR'), 'IR', data['LotShape'])
+
+    # Alley
+    data['Alley'] = np.where(data['Alley'] != 'No alley access', 'Alley access', data['Alley'])
+
+    # LandContour
+    data['LandContour'] = np.where(data['LandContour'] != 'Lvl', 'Non Flatness', data['LandContour'])
+
+    # Condition1
+    data.loc[((data['Condition1'] == 'RRNn') | (data['Condition1'] == 'RRNe')), 'Condition1'] = 'Within_200_Railroad'
+    data.loc[((data['Condition1'] == 'RRAn') | (data['Condition1'] == 'RRAe')), 'Condition1'] = 'Adjacent_to_Railroad'
+    data.loc[((data['Condition1'] == 'Artery') | (data['Condition1'] == 'Feedr')), 'Condition1'] = 'Adjacent_to_arterial_feeder_street'
+    data.loc[((data['Condition1'] == 'PosN') | (data['Condition1'] == 'PosA')), 'Condition1'] = 'Positive_Feature'
+
+    # Exterior1st
+    data.loc[((data['Exterior1st'] == 'Wd Sdng') | (data['Exterior1st'] == 'WdShing')), 'Exterior1st'] = 'Wood'
+    data.loc[((data['Exterior1st'] == 'AsbShng') | (data['Exterior1st'] == 'AsphShn')), 'Exterior1st'] = 'Shingles'
+    data.loc[((data['Exterior1st'] == 'ImStucc') | (data['Exterior1st'] == 'Stucco')), 'Exterior1st'] = 'Stucco' 
+
+    # Exterior2nd
+    data.loc[((data['Exterior2nd'] == 'Wd Sdng') | (data['Exterior2nd'] == 'WdShing')), 'Exterior2nd'] = 'Wood'
+    data.loc[((data['Exterior2nd'] == 'AsbShng') | (data['Exterior2nd'] == 'AsphShn')), 'Exterior2nd'] = 'Shingles'
+    data.loc[((data['Exterior2nd'] == 'ImStucc') | (data['Exterior2nd'] == 'Stucco')), 'Exterior2nd'] = 'Stucco' 
+
+    # MasVnrType
+    data.loc[((data['MasVnrType'] == 'BrkFace') | (data['MasVnrType'] == 'BrkCmn')), 'MasVnrType'] = 'Brick'
+
+    # BsmtFinType1
+    data.loc[((data['BsmtFinType1'] == 'ALQ') | (data['BsmtFinType1'] == 'BLQ') | (data['BsmtFinType1'] == 'Rec')), 'BsmtFinType1'] = 'Average'
+
+    # BsmtFinType2
+    data.loc[((data['BsmtFinType2'] == 'ALQ') | (data['BsmtFinType2'] == 'BLQ') | (data['BsmtFinType2'] == 'Rec')), 'BsmtFinType2'] = 'Average'
+
+    # Functional
+    data.loc[((data['Functional'] == 'Min1') | (data['Functional'] == 'Min2')), 'Functional'] = 'Minor Deductions'
+    data.loc[((data['Functional'] == 'Maj1') | (data['Functional'] == 'Maj2')), 'Functional'] = 'Major Deductions'
+
+    # SaleType
+    data.loc[((data['SaleType'] == 'WD') | (data['SaleType'] == 'CWD') | (data['SaleType'] == 'VWD')), 'SaleType'] = 'Warranty'
+    data.loc[((data['SaleType'] == 'Con') | (data['SaleType'] == 'ConLw') | (data['SaleType'] == 'ConLI') | (data['SaleType'] == 'ConLD')), 'SaleType'] = 'Contract'
+
+    return data
+
+## Function to scale conditions
+def scale_condition(x, mapping):
+    return x.map(mapping).fillna(x)
 
 
 
 
+sys.path
