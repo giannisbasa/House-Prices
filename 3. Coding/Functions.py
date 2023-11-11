@@ -89,7 +89,7 @@ def distribution(df, x):
 # GRAPHS 
 ## 2.1 Boxplot
 def box_plot(df, x):
-    plt.style.use('seaborn-darkgrid')
+    plt.style.use('seaborn-v0_8-darkgrid')
     plt.figure(figsize=(15,5))
     plt.title('Boxplot');
     sns.boxplot(df[x]);
@@ -97,7 +97,7 @@ def box_plot(df, x):
 
 ## 2.2 Distplot
 def distplot(df, x):  
-    plt.style.use('seaborn-darkgrid')
+    plt.style.use('seaborn-v0_8-darkgrid')
     plt.figure(figsize=(15,5))
     sns.distplot(df[x])
 
@@ -112,7 +112,7 @@ def distplot(df, x):
 
 ## 2.3 Histplot
 def histplot(df, x):
-    plt.style.use('seaborn-darkgrid')
+    plt.style.use('seaborn-v0_8-darkgrid')
     plt.figure(figsize=(15,5))
     plt.title('Histplot');
     sns.histplot(df[x]);
@@ -159,7 +159,7 @@ def calculate_fences(df, target_columns=['Id','SalePrice'], iqr_multiplier=1.5):
     low_ls = []
     high_ls = []
 
-    for col in df.select_dtypes(include='number').columns:
+    for col in df.select_dtypes(include = 'number').columns:
         if col not in target_columns:
             q1 = df[col].quantile(0.25)
             q3 = df[col].quantile(0.75)
@@ -326,5 +326,3 @@ def scale_condition(x, mapping):
 
 
 
-
-sys.path

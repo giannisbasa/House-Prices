@@ -3,12 +3,13 @@ Flask
 pandas
 numpy
 matplotlib
-Seaborn
+seaborn
 fast-ml
 datetime
 scipy
 xgboost
 Functions
+
 
 
 
