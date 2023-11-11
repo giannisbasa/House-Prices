@@ -420,11 +420,13 @@ class CategoricalEncoder(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X_copy = X.copy()
         encoded_columns = self.encoder.transform(X[self.columns])
-        X_encoded = pd.DataFrame(encoded_columns, columns=self.encoder.get_feature_names(self.columns), index=X_copy.index)
+        feature_names = self.encoder.get_feature_names_out(input_features=self.columns)
+        X_encoded = pd.DataFrame(encoded_columns, columns=feature_names, index=X_copy.index)
         X_copy = pd.concat([X_copy, X_encoded], axis=1)
         X_copy = X_copy.drop(self.columns, axis=1)
         return X_copy
 
+# Modify the categorical_encoding_transformer as follows
 categorical_columns_to_encode = data.select_dtypes(include=['object']).columns
 categorical_encoding_transformer = CategoricalEncoder(columns=categorical_columns_to_encode, encoder=OneHotEncoder(sparse=False, drop='first'))
 
@@ -444,6 +446,7 @@ preprocessor = ColumnTransformer(
 )
 
 
+
 # CREATE FINAL PIPELINE
 final_steps = [
     (preprocessor)
@@ -454,4 +457,4 @@ final_pipeline = Pipeline(final_steps)
 preprocessor.fit(data)
 
 preprocessed_data = preprocessor.transform(pd.DataFrame(data))
-
+preprocessed_data
